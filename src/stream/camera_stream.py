@@ -2,6 +2,7 @@ import pyrealsense2 as rs
 from pupil_apriltags import Detector
 import numpy as np
 import cv2
+from markers.underline_markers import underline_markers
 
 
 def stream():
@@ -41,10 +42,9 @@ def stream():
                 aligned_image = True
 
         color_image = np.asanyarray(color_frame.get_data())
+        depth_image = np.asanyarray(depth_frame.get_data())
 
         # For stream in window mode.
-        # depth_image = np.asanyarray(depth_frame.get_data())
-        #
         # depth_colormap = cv2.applyColorMap(
         #     cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
         #
@@ -64,26 +64,8 @@ def stream():
         gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
         detector.detect(gray)
         results = detector.detect(gray)
-
-        for r in results: # underline markers in squares
-            (ptA, ptB, ptC, ptD) = r.corners
-            ptB = (int(ptB[0]), int(ptB[1]))
-            ptC = (int(ptC[0]), int(ptC[1]))
-            ptD = (int(ptD[0]), int(ptD[1]))
-            ptA = (int(ptA[0]), int(ptA[1]))
-            # draw the bounding box of the AprilTag detection
-            cv2.line(gray, ptA, ptB, (255, 0, 0), 2)
-            cv2.line(gray, ptB, ptC, (255, 0, 0), 2)
-            cv2.line(gray, ptC, ptD, (255, 0, 0), 2)
-            cv2.line(gray, ptD, ptA, (255, 0, 0), 2)
-            # draw the center (x, y)-coordinates of the AprilTag
-            (cX, cY) = (int(r.center[0]), int(r.center[1]))
-            cv2.circle(gray, (cX, cY), 5, (0, 0, 255), -1)
-            # draw the tag family on the image
-            tagFamily = r.tag_family.decode("utf-8")
-            cv2.putText(gray, tagFamily, (ptA[0], ptA[1] - 15),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            print("[INFO] tag family: {}".format(tagFamily))
+        rgb_image = cv2.cvtColor(color_image, cv2.COLOR_BGR2RGB)
+        underline_markers(results, rgb_image)
         cv2.waitKey(1)
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + cv2.imencode('.jpg', gray)[1].tobytes() + b'\r\n')
+               b'Content-Type: image/jpeg\r\n\r\n' + cv2.imencode('.jpg', rgb_image)[1].tobytes() + b'\r\n')
