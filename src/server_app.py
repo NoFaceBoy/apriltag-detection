@@ -1,12 +1,12 @@
 from flask import Flask, render_template, Response
 
-from stream.camera_stream import stream
+from stream.camera_stream import web_stream
 
 app = Flask(__name__)
 
 
 def generate_frames():
-    return stream()
+    return web_stream()
 
 
 @app.route('/')
