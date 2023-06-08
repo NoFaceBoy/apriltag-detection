@@ -1,5 +1,7 @@
 import pyrealsense2 as rs
 
+RESOLUTION = (640, 480)
+
 
 def camera_config():
     while True:
@@ -21,7 +23,6 @@ def camera_config():
             print("Depth camera with Color sensor not found")
             exit(0)
 
-        RESOLUTION = (640, 480)
         config.enable_stream(rs.stream.depth, RESOLUTION[0], RESOLUTION[1], rs.format.z16, 30)
         config.enable_stream(rs.stream.color, RESOLUTION[0], RESOLUTION[1], rs.format.rgb8, 30)
 
