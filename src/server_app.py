@@ -1,12 +1,12 @@
 from flask import Flask, render_template, Response
 
-from stream.camera_stream import stream
+from stream.camera_stream import web_stream
 
 app = Flask(__name__)
 
 
 def generate_frames():
-    return stream()
+    return web_stream()
 
 
 @app.route('/')
@@ -20,4 +20,4 @@ def depth_video():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0")
